@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#FFFFFF">
+
+    <!-- Circular Home Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/homeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="Home"
+        android:src="@drawable/home"
+        app:fabSize="mini"
+        app:backgroundTint="#FF9800"
+        app:tint="#FFFFFF"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Track Bus Title -->
+
+    <!-- Grey Boxes -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/homeButton">
+
+        <!-- Grey Box 1 -->
+        <!-- Grey Box 2 -->
+
+        <TextView
+            android:layout_width="68dp"
+            android:layout_height="38dp"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:text="SOS"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/emergencySignalBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/red"
+            android:text="ACTIVATE EMERGENCY SIGNAL"
+            android:textAllCaps="true"
+            android:textSize="18sp" />
+
+        <!-- Women Safety Button -->
+        <Button
+            android:id="@+id/womenSafetyBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/orange"
+            android:text="Women Safety"
+            android:textAllCaps="true"
+            android:textSize="18sp" />
+
+        <!-- Report Breakdown Button -->
+        <Button
+            android:id="@+id/reportBreakdownBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/orange"
+            android:text="Report Breakdown"
+            android:textAllCaps="true"
+            android:textSize="18sp" />
+
+        <!-- Medical Assistance Button -->
+        <Button
+            android:id="@+id/medicalAssistanceBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/orange"
+            android:text="Medical Assistance"
+            android:textAllCaps="true"
+            android:textSize="18sp" />
+
+        <!-- Report Accident Button -->
+        <Button
+            android:id="@+id/reportAccidentBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/orange"
+            android:text="Report Accident"
+            android:textAllCaps="true"
+            android:textSize="18sp" />
+
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

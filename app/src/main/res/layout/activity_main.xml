@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <ImageView
+        android:layout_width="332dp"
+        android:layout_height="336dp"
+        android:contentDescription="Bus Icon"
+        android:src="@drawable/bus" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="42dp"
+        android:text="Welcome To Bus Tracking App"
+        android:textColor="#FFA500"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp">
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/circle_dot_orange"
+            android:layout_margin="5dp"
+            android:layout_gravity="center" />
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/circle_dot_gray"
+            android:layout_margin="5dp"
+            android:layout_gravity="center" />
+
+        <View
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/circle_dot_gray"
+            android:layout_margin="5dp"
+            android:layout_gravity="center" />
+
+    </LinearLayout>
+    <Button
+        android:id="@+id/getStartedButton"
+        android:layout_width="155dp"
+        android:layout_height="67dp"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="#FFA500"
+        android:text="GET STARTED"
+        android:textColor="#FFFFFF" />
+
+</LinearLayout>
