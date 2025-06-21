@@ -13,184 +13,147 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Toolbar at the Top -->
+        <!-- Toolbar -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="#FF9800"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            android:title="@string/app_name"
-            android:titleTextColor="#000000"
-            android:titleTextAppearance="@style/Toolbar.TitleText"/>
+            android:title="Welcome"
+            android:titleTextColor="#000000"/>
 
-        <!-- Welcome Message -->
+        <!-- Welcome Text -->
         <TextView
-            android:id="@+id/welcomeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/welcome"
+            android:text="Welcome to the Bus Tracker"
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="#000000"
-            android:gravity="center"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="24dp"
-            android:padding="12dp"/>
+            android:layout_gravity="center"
+            android:layout_margin="20dp"/>
 
-        <!-- Card Container -->
+        <!-- Cards Grid -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Row 1: Track Bus and Attendance -->
+            <!-- Row 1 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="24dp">
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal">
 
-                <!-- Track Bus Card -->
                 <LinearLayout
                     android:id="@+id/layoutTrackBus"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:minHeight="120dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
                     android:background="@drawable/button_background"
-                    android:padding="12dp"
-                    android:layout_marginEnd="16dp"
-                    android:onClick="onTrackBusClick">
+                    android:onClick="onTrackBusClick"
+                    android:orientation="vertical"
+                    android:padding="12dp">
 
                     <ImageView
-                        android:layout_width="153dp"
-                        android:layout_height="147dp"
-                        android:contentDescription="@string/track_bus"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/track"/>
+                        android:layout_width="146dp"
+                        android:layout_height="129dp"
+                        android:src="@drawable/track" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/track_bus"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="#212121"
                         android:gravity="center"
-                        android:layout_marginTop="8dp"/>
+                        android:text="Track Bus"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- Attendance Card -->
                 <LinearLayout
                     android:id="@+id/layoutAttendance"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:minHeight="120dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:background="@drawable/button_background"
-                    android:padding="12dp"
                     android:layout_marginStart="16dp"
-                    android:onClick="onAttendanceClick">
+                    android:layout_weight="1"
+                    android:background="@drawable/button_background"
+                    android:onClick="onAttendanceClick"
+                    android:orientation="vertical"
+                    android:padding="12dp">
 
                     <ImageView
-                        android:layout_width="136dp"
-                        android:layout_height="143dp"
-                        android:contentDescription="@string/attendance"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/att"/>
+                        android:layout_width="122dp"
+                        android:layout_height="129dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/att" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/attendance"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="#212121"
                         android:gravity="center"
-                        android:layout_marginTop="8dp"/>
+                        android:text="Attendance"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Row 2: SOS and Notification -->
+            <!-- Row 2 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <!-- SOS Card -->
                 <LinearLayout
                     android:id="@+id/layoutSOS"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:minHeight="120dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
                     android:background="@drawable/button_background"
-                    android:padding="12dp"
-                    android:layout_marginEnd="16dp"
-                    android:onClick="onSOSClick">
+                    android:onClick="onSOSClick"
+                    android:orientation="vertical"
+                    android:padding="12dp">
 
                     <ImageView
-                        android:layout_width="131dp"
-                        android:layout_height="137dp"
-                        android:contentDescription="@string/sos"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/sos"/>
+                        android:layout_width="129dp"
+                        android:layout_height="129dp"
+                        android:src="@drawable/sos" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/sos"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="#212121"
                         android:gravity="center"
-                        android:layout_marginTop="8dp"/>
+                        android:text="SOS"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- Notification Card -->
                 <LinearLayout
                     android:id="@+id/layoutNotification"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:minHeight="120dp"
-                    android:orientation="vertical"
-                    android:gravity="center"
-                    android:background="@drawable/button_background"
-                    android:padding="12dp"
                     android:layout_marginStart="16dp"
-                    android:onClick="onNotificationClick">
+                    android:layout_weight="1"
+                    android:background="@drawable/button_background"
+                    android:onClick="onNotificationClick"
+                    android:orientation="vertical"
+                    android:padding="12dp">
 
                     <ImageView
-                        android:layout_width="129dp"
-                        android:layout_height="133dp"
-                        android:contentDescription="@string/notification"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/notifi"/>
+                        android:layout_width="123dp"
+                        android:layout_height="129dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/notifi" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/notification"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="#212121"
                         android:gravity="center"
-                        android:layout_marginTop="8dp"/>
+                        android:text="Notification"
+                        android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Navigation Drawer -->
+    <!-- Drawer Menu -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
