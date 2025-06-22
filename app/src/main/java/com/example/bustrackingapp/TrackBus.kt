@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
@@ -14,8 +15,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class TrackBus : AppCompatActivity(), OnMapReadyCallback {
@@ -25,8 +25,10 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var geofencePendingIntent: PendingIntent
     private lateinit var busDetailsTextView: TextView
 
-    // Request code for location permission
-    private val LOCATION_REQUEST_CODE = 101
+    private val geofenceList = listOf(
+        LatLng(16.6875, 74.2187) to "DYP_College", // DY Patil College
+        LatLng(16.7054, 74.2400) to "Shahupuri_Stop" // Shahupuri Stop
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,10 +41,6 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
             finish()
         }
 
-        // Request permissions at runtime
-        requestLocationPermissions()
-
-        // Initialize geofencing
         geofencingClient = LocationServices.getGeofencingClient(this)
         geofencePendingIntent = PendingIntent.getBroadcast(
             this,
@@ -60,72 +58,80 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
 
-        // 📍 D.Y. Patil School Location
-        val collegeLocation = LatLng(16.6875, 74.2187)
+        val boundsBuilder = LatLngBounds.builder()
 
-        // 🚌 Add marker
-        mMap.addMarker(MarkerOptions().position(collegeLocation).title("Bus: BUS01"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(collegeLocation, 14f))
+        for ((location, id) in geofenceList) {
+            // 🟢 Draw circle for each geofence
+            mMap.addCircle(
+                CircleOptions()
+                    .center(location)
+                    .radius(150.0)
+                    .strokeColor(0xFF6200EE.toInt()) // Purple border
+                    .fillColor(0x306200EE) // Semi-transparent fill
+                    .strokeWidth(3f)
+            )
 
-        busDetailsTextView.text = """
-            Bus ID: BUS01
-            Latitude: ${collegeLocation.latitude}
-            Longitude: ${collegeLocation.longitude}
-        """.trimIndent()
+            // 📍 Marker
+            mMap.addMarker(MarkerOptions().position(location).title("Zone: $id"))
 
-        // Start geofencing
+            // 📦 Include in bounds
+            boundsBuilder.include(location)
+        }
+
+        // 📸 Move camera to fit all geofences with padding
+        val bounds = boundsBuilder.build()
+        val padding = 100 // px
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+
+        busDetailsTextView.text = "Geofence zones initialized."
+
+        // 🔐 Check permissions & add geofences
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "❗ Grant location permission", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         addGeofences()
     }
 
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     private fun addGeofences() {
-        val geofences = listOf(
+        val geofences = geofenceList.map { (latLng, id) ->
             Geofence.Builder()
-                .setRequestId("dy_patils_college")
-                .setCircularRegion(16.6875, 74.2187, 150f)
+                .setRequestId(id)
+                .setCircularRegion(latLng.latitude, latLng.longitude, 150f)
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
-                .build(),
-
-            Geofence.Builder()
-                .setRequestId("shahupuri_stop")
-                .setCircularRegion(16.7054, 74.2400, 150f)
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+                .setTransitionTypes(
+                    Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT
+                )
                 .build()
-        )
+        }
 
         val request = GeofencingRequest.Builder()
             .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
             .addGeofences(geofences)
             .build()
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "❗ Location permission not granted", Toast.LENGTH_SHORT).show()
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
             return
         }
-
         geofencingClient.addGeofences(request, geofencePendingIntent)
             .addOnSuccessListener {
-                Toast.makeText(this, "✅ Geofences added successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "✅ Geofences added", Toast.LENGTH_SHORT).show()
             }
-            .addOnFailureListener { e ->
-                Toast.makeText(this, "❌ Failed to add geofences: ${e.message}", Toast.LENGTH_LONG).show()
-                e.printStackTrace()
+            .addOnFailureListener {
+                Toast.makeText(this, "❌ Failed to add geofences", Toast.LENGTH_SHORT).show()
             }
-    }
-
-    private fun requestLocationPermissions() {
-        val permissions = arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        )
-
-        if (permissions.any {
-                ActivityCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-            }
-        ) {
-            ActivityCompat.requestPermissions(this, permissions, LOCATION_REQUEST_CODE)
-        }
     }
 }
