@@ -4,16 +4,12 @@ import android.Manifest
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.Geofence
-import com.google.android.gms.location.GeofencingClient
-import com.google.android.gms.location.GeofencingRequest
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -29,27 +25,24 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var geofencePendingIntent: PendingIntent
     private lateinit var busDetailsTextView: TextView
 
-    private val testLat = 18.5204    // 📍 Pune coordinates
-    private val testLng = 73.8567
-    private val busId = "BUS01"
+    // Request code for location permission
+    private val LOCATION_REQUEST_CODE = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_track_bus2)
 
-        // 🧭 Request location permissions
-        requestPermissionsIfNeeded()
-
-        // 📄 Bus Details UI
         busDetailsTextView = findViewById(R.id.busDetailsTextView)
 
-        // 🏠 Home button
         findViewById<FloatingActionButton>(R.id.homeButton).setOnClickListener {
             startActivity(Intent(this, HomeActivity::class.java))
             finish()
         }
 
-        // 📍 Initialize geofencing
+        // Request permissions at runtime
+        requestLocationPermissions()
+
+        // Initialize geofencing
         geofencingClient = LocationServices.getGeofencingClient(this)
         geofencePendingIntent = PendingIntent.getBroadcast(
             this,
@@ -58,7 +51,6 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // 🗺️ Load map
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
@@ -68,62 +60,72 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
 
-        val location = LatLng(testLat, testLng)
+        // 📍 D.Y. Patil School Location
+        val collegeLocation = LatLng(16.6875, 74.2187)
 
-        mMap.addMarker(
-            MarkerOptions().position(location).title("Bus: $busId")
-        )
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 16f))
+        // 🚌 Add marker
+        mMap.addMarker(MarkerOptions().position(collegeLocation).title("Bus: BUS01"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(collegeLocation, 14f))
 
         busDetailsTextView.text = """
-            Bus ID: $busId
-            Latitude: $testLat
-            Longitude: $testLng
+            Bus ID: BUS01
+            Latitude: ${collegeLocation.latitude}
+            Longitude: ${collegeLocation.longitude}
         """.trimIndent()
 
-        addGeofence(location, "SchoolZone")
+        // Start geofencing
+        addGeofences()
     }
 
-    private fun addGeofence(center: LatLng, id: String) {
-        val geofence = Geofence.Builder()
-            .setRequestId(id)
-            .setCircularRegion(center.latitude, center.longitude, 100f)
-            .setExpirationDuration(Geofence.NEVER_EXPIRE)
-            .setTransitionTypes(
-                Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT
-            )
-            .build()
+    private fun addGeofences() {
+        val geofences = listOf(
+            Geofence.Builder()
+                .setRequestId("dy_patils_college")
+                .setCircularRegion(16.6875, 74.2187, 150f)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build(),
+
+            Geofence.Builder()
+                .setRequestId("shahupuri_stop")
+                .setCircularRegion(16.7054, 74.2400, 150f)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build()
+        )
 
         val request = GeofencingRequest.Builder()
             .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-            .addGeofence(geofence)
+            .addGeofences(geofences)
             .build()
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Location permission not granted", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "❗ Location permission not granted", Toast.LENGTH_SHORT).show()
             return
         }
 
         geofencingClient.addGeofences(request, geofencePendingIntent)
             .addOnSuccessListener {
-                Toast.makeText(this, "✅ Geofence Added for $id", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "✅ Geofences added successfully", Toast.LENGTH_SHORT).show()
             }
-            .addOnFailureListener {
-                Toast.makeText(this, "❌ Failed to add Geofence", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "❌ Failed to add geofences: ${e.message}", Toast.LENGTH_LONG).show()
+                e.printStackTrace()
             }
     }
 
-    private fun requestPermissionsIfNeeded() {
-        val permissions = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        }
+    private fun requestLocationPermissions() {
+        val permissions = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        )
 
         if (permissions.any {
                 ActivityCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-            }) {
-            ActivityCompat.requestPermissions(this, permissions.toTypedArray(), 1001)
+            }
+        ) {
+            ActivityCompat.requestPermissions(this, permissions, LOCATION_REQUEST_CODE)
         }
     }
 }
