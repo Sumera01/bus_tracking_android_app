@@ -3,19 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.bustrackingapp">
 
-    <!-- 🔒 Location Permissions -->
+    <!-- 🔐 Location Permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <!-- 🎯 Background Location (for Android 10+) -->
+    <!-- Background location for geofencing (Android 10+) -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
-    <!-- 🌐 Network Access -->
+    <!-- 🌐 Internet -->
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- ✅ Required for geofencing to work in background (Android 12+) -->
+    <!-- 🧭 Foreground service (Required on Android 12+ if using location in background) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    <!-- 📦 Application -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -32,7 +33,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDjWXHa4cpYsQk01UBQUi6WtLtaZRRm1RI" />
 
-        <!-- 📦 App Activities -->
+        <!-- 📱 Activities -->
         <activity android:name=".NotificationActivity" android:exported="false" />
         <activity android:name=".SOSActivity" android:exported="false" />
         <activity android:name=".AttendanceActivity" android:exported="false" />
@@ -41,7 +42,7 @@
         <activity android:name=".NextActivity" android:exported="false" />
         <activity android:name=".TrackBusActivity" android:exported="false" />
 
-        <!-- 🚀 Launcher Activity -->
+        <!-- 🚀 Launcher -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -52,7 +53,7 @@
             </intent-filter>
         </activity>
 
-        <!-- 📡 Geofence Broadcast Receiver -->
+        <!-- 📡 Geofence Receiver -->
         <receiver
             android:name=".GeofenceBroadcastReceiver"
             android:exported="true" />
