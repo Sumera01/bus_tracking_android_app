@@ -33,8 +33,8 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
     }
 
     private val zones = listOf(
-        LatLng(16.7054, 74.2400) to "Shahupuri_Stop",
-        LatLng(16.6875, 74.2187) to "DYP_College"
+        LatLng(16.6784, 74.2434) to "SSC_Board",
+        LatLng(16.7288,74.2443) to "DYP_College"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,9 +62,9 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
         if (hasLocationPermission()) {
             lifecycleScope.launch {
                 drawRouteViaRoads(
-                    LatLng(16.7054, 74.2400),
-                    LatLng(16.6875, 74.2187),
-                    "Route 1 (Shahupuri → DY Patil)"
+                    LatLng(16.6784, 74.2434),
+                    LatLng(16.7288,74.2443),
+                    "Route 1 (SSC_Board → DY Patil)"
                 )
             }
         } else {
@@ -128,8 +128,8 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
         if (rq == LOCATION_PERMISSION_CODE && hasLocationPermission()) {
             lifecycleScope.launch {
                 drawRouteViaRoads(
-                    LatLng(16.7054, 74.2400),
-                    LatLng(16.6875, 74.2187),
+                    LatLng(16.6784, 74.2434),
+                    LatLng(16.7288,74.2443),
                     "Route 1"
                 )
             }
