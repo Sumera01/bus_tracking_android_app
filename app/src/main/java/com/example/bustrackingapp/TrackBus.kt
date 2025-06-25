@@ -3,8 +3,6 @@ package com.example.bustrackingapp
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -145,11 +143,9 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
             for (pos in route) {
                 busMarker?.remove()
                 busMarker = mMap.addMarker(
-                    MarkerOptions()
-                        .position(pos)
+                    MarkerOptions().position(pos)
                         .title("🚌 Bus: %.4f, %.4f".format(pos.latitude, pos.longitude))
-                        .icon(getBusIcon())
-                        .anchor(0.5f, 1.0f) // Center-bottom anchor for the bus image
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
                 )
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(pos))
                 busDetailsTextView.text = "Bus at:\nLat: %.4f\nLng: %.4f".format(pos.latitude, pos.longitude)
@@ -158,14 +154,6 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
                 delay(2000L)
             }
         }
-    }
-
-    private fun getBusIcon(): BitmapDescriptor {
-        // Load the custom bus image from drawable
-        val bitmap = BitmapFactory.decodeResource(resources, R.drawable.busonmap)
-        // Scale the bitmap to a suitable size (e.g., 48x48 pixels)
-        val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 48, 48, false)
-        return BitmapDescriptorFactory.fromBitmap(scaledBitmap)
     }
 
     private fun handleZoneTransitions(pos: LatLng, zoneStates: MutableMap<String, Boolean>) {
