@@ -1,40 +1,45 @@
 package com.example.bustrackingapp
 
 import android.Manifest
-import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
-import android.os.Build
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.*
+import kotlin.math.*
 
 class TrackBus : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
-    private lateinit var geofencingClient: GeofencingClient
-    private lateinit var geofencePendingIntent: PendingIntent
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var busDetailsTextView: TextView
     private var busMarker: Marker? = null
+    private var job: Job? = null
+    private var isAppInForeground: Boolean = true
 
     private val LOCATION_PERMISSION_CODE = 100
 
     // Geofence zones
     private val geofenceList = listOf(
-        LatLng(16.6875, 74.2187) to "DYP_College",        // DY Patil
-        LatLng(16.7054, 74.2400) to "Shahupuri_Stop"     // Shahupuri
+        LatLng(16.7054, 74.2400) to "Shahupuri_Stop", // Starting point
+        LatLng(16.6875, 74.2187) to "DYP_College"   // Destination
+    )
+
+    // Simulated bus route coordinates from Shahupuri to DYP
+    private val busRoute = listOf(
+        LatLng(16.7054, 74.2400), // Shahupuri
+        LatLng(16.7020, 74.2365), // Intermediate point 1
+        LatLng(16.6980, 74.2320), // Intermediate point 2
+        LatLng(16.6940, 74.2265), // Intermediate point 3
+        LatLng(16.6875, 74.2187)  // DYP College
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,22 +53,10 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
             finish()
         }
 
-        // Services
-        geofencingClient = LocationServices.getGeofencingClient(this)
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-
-        geofencePendingIntent = PendingIntent.getBroadcast(
-            this,
-            0,
-            Intent(this, GeofenceBroadcastReceiver::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
         val mapFragment = supportFragmentManager.findFragmentById(R.id.mapFragment) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
 
-    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         mMap.uiSettings.isZoomControlsEnabled = true
@@ -72,71 +65,30 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
         drawGeofences()
 
         if (hasLocationPermission()) {
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return
-            }
-            startLocationUpdates()
-            addGeofences()
+            startBusRouteSimulation()
         } else {
             requestLocationPermission()
         }
     }
 
     private fun hasLocationPermission(): Boolean {
-        val fine = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val background = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
-        } else true
-        return fine && background
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun requestLocationPermission() {
-        val permissions = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-        }
-        ActivityCompat.requestPermissions(this, permissions.toTypedArray(), LOCATION_PERMISSION_CODE)
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            LOCATION_PERMISSION_CODE
+        )
     }
 
-    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_CODE && hasLocationPermission()) {
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return
-            }
-            startLocationUpdates()
-            addGeofences()
+            startBusRouteSimulation()
         } else {
-            Toast.makeText(this, "❗ Location permissions are required", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "❗ Location permission required to show map", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -154,64 +106,124 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
             mMap.addMarker(MarkerOptions().position(location).title("Zone: $id"))
             boundsBuilder.include(location)
         }
+        // Add polyline for the bus route
+        mMap.addPolyline(
+            PolylineOptions()
+                .addAll(busRoute)
+                .color(0xFF2196F3.toInt())
+                .width(5f)
+        )
         mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 100))
     }
 
-    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    private fun startLocationUpdates() {
-        val locationRequest = LocationRequest.create().apply {
-            interval = 5000
-            fastestInterval = 3000
-            priority = Priority.PRIORITY_HIGH_ACCURACY
-        }
+    private fun startBusRouteSimulation() {
+        job = CoroutineScope(Dispatchers.Main).launch {
+            var currentSegment = 0
+            var progress = 0.0
+            val segmentDuration = 5000L // 5 seconds per segment
 
-        if (!hasLocationPermission()) return
+            while (isActive && currentSegment < busRoute.size - 1) {
+                val start = busRoute[currentSegment]
+                val end = busRoute[currentSegment + 1]
 
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                val location: Location = result.lastLocation ?: return
-                val latLng = LatLng(location.latitude, location.longitude)
+                // Interpolate position
+                val lat = start.latitude + (end.latitude - start.latitude) * progress
+                val lng = start.longitude + (end.longitude - start.longitude) * progress
+                val currentPos = LatLng(lat, lng)
 
+                // Update bus marker
                 busMarker?.remove()
                 busMarker = mMap.addMarker(
                     MarkerOptions()
-                        .position(latLng)
+                        .position(currentPos)
                         .title("🚌 Bus Live")
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
                 )
-                mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng))
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(currentPos))
 
-                busDetailsTextView.text = "Bus:\nLat: ${location.latitude}\nLng: ${location.longitude}"
+                // Update TextView
+                busDetailsTextView.text = "Bus Location:\nLat: %.4f\nLng: %.4f".format(lat, lng)
+
+                // Check geofence transitions
+                if (isAppInForeground) {
+                    checkGeofenceTransition(currentPos)
+                }
+
+                // Update progress
+                progress += 0.05 // Adjust for smoother movement (20 updates per segment)
+                if (progress >= 1.0) {
+                    progress = 0.0
+                    currentSegment++
+                }
+
+                delay(segmentDuration / 20) // Update 20 times per segment
             }
-        }, mainLooper)
+
+            // Bus has reached DYP College
+            if (currentSegment == busRoute.size - 1) {
+                busMarker?.remove()
+                busMarker = mMap.addMarker(
+                    MarkerOptions()
+                        .position(busRoute.last())
+                        .title("🚌 Bus at DYP_College")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                )
+                busDetailsTextView.text = "Bus has reached DYP College"
+                if (isActive && isAppInForeground) {
+                    sendNotification("Geofence Alert", "🟢 Bus has arrived at DYP_College")
+                }
+            }
+        }
     }
 
-    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    private fun addGeofences() {
-        val geofences = geofenceList.map { (latLng, id) ->
-            Geofence.Builder()
-                .setRequestId(id)
-                .setCircularRegion(latLng.latitude, latLng.longitude, 300f)
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .setTransitionTypes(
-                    Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_EXIT
-                )
-                .build()
+    private fun checkGeofenceTransition(busLocation: LatLng) {
+        for ((center, id) in geofenceList) {
+            val distance = FloatArray(1)
+            android.location.Location.distanceBetween(
+                busLocation.latitude, busLocation.longitude,
+                center.latitude, center.longitude, distance
+            )
+            val isInside = distance[0] <= 300f
+
+            // Store previous state to detect transitions
+            val wasInsideKey = "wasInside_$id"
+            val wasInside = getSharedPreferences("BusTrackingPrefs", MODE_PRIVATE)
+                .getBoolean(wasInsideKey, false)
+
+            if (isInside && !wasInside) {
+                sendNotification("Geofence Alert", "🟢 Bus entered zone: $id")
+                getSharedPreferences("BusTrackingPrefs", MODE_PRIVATE).edit()
+                    .putBoolean(wasInsideKey, true).apply()
+            } else if (!isInside && wasInside) {
+                sendNotification("Geofence Alert", "🔴 Bus exited zone: $id")
+                getSharedPreferences("BusTrackingPrefs", MODE_PRIVATE).edit()
+                    .putBoolean(wasInsideKey, false).apply()
+            }
         }
+    }
 
-        val request = GeofencingRequest.Builder()
-            .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-            .addGeofences(geofences)
-            .build()
-
-        if (!hasLocationPermission()) return
-
-        geofencingClient.addGeofences(request, geofencePendingIntent)
-            .addOnSuccessListener {
-                Toast.makeText(this, "✅ Geofences added", Toast.LENGTH_SHORT).show()
+    private fun sendNotification(title: String, message: String) {
+        if (isAppInForeground) {
+            val intent = Intent(this, GeofenceBroadcastReceiver::class.java).apply {
+                putExtra("title", title)
+                putExtra("message", message)
             }
-            .addOnFailureListener {
-                Toast.makeText(this, "❌ Failed to add geofences", Toast.LENGTH_SHORT).show()
-            }
+            sendBroadcast(intent)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        isAppInForeground = true
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isAppInForeground = false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        job?.cancel()
     }
 }

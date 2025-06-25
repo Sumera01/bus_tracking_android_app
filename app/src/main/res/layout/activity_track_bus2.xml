@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
@@ -34,8 +34,8 @@
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="16dp" />
 
-    <!-- 🗺️ Google Map Fragment replacing the grey box -->
-    <fragment
+    <!-- Google Map Fragment -->
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/mapFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="0dp"
@@ -64,12 +64,11 @@
             android:id="@+id/busDetailsTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bus Details will appear here"
+            android:text="Bus Location:\nLat: Loading...\nLng: Loading..."
             android:textColor="#000000"
             android:textSize="16sp"
             android:textStyle="bold"
             android:padding="4dp" />
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
