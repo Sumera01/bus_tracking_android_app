@@ -42,7 +42,7 @@ android {
 }
 
 dependencies {
-    // ✅ AndroidX Core and UI
+    // ✅ AndroidX & Material Design
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -54,15 +54,21 @@ dependencies {
     // ✅ Google Maps SDK
     implementation("com.google.android.gms:play-services-maps:18.2.0")
 
-    // ✅ Google Location Services (needed for Geofencing, GPS)
+    // ✅ Google Location Services (for GPS, Geofencing)
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
-    // ✅ Retrofit for HTTP API calls
+    // ✅ Google Maps Utils (for decoding polylines)
+    implementation("com.google.maps.android:android-maps-utils:2.3.0")
+
+    // ✅ Retrofit (for Directions API)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    // ✅ Gson (used internally for JSON)
+    // ✅ Gson (used for JSON parsing)
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // ✅ Coroutines (if used elsewhere)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // ✅ Testing
     testImplementation(libs.junit)
