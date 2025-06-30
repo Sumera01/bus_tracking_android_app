@@ -2,21 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.bustrackingapp">
-
     <!-- 🔐 Location Permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- Background location for geofencing (Android 10+) -->
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-
-    <!-- 🌐 Internet -->
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- 🧭 Foreground service (Required on Android 12+ if using location in background) -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-    <!-- 📦 Application -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- Background location for geofencing (Android 10+) -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- 🌐 Internet -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- 🧭 Foreground service (Required on Android 12+ if using location in background) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- 📦 Application -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -27,33 +20,44 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Bustrackingapp"
         tools:targetApi="31">
-
+        <activity
+            android:name=".Notification"
+            android:exported="false" />
         <!-- 🌍 Google Maps API Key -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDjWXHa4cpYsQk01UBQUi6WtLtaZRRm1RI" />
-
-        <!-- 📱 Activities -->
-        <activity android:name=".NotificationActivity" android:exported="false" />
-        <activity android:name=".SOSActivity" android:exported="false" />
-        <activity android:name=".AttendanceActivity" android:exported="false" />
-        <activity android:name=".TrackBus" android:exported="false" />
-        <activity android:name=".HomeActivity" android:exported="false" />
-        <activity android:name=".NextActivity" android:exported="false" />
-        <activity android:name=".TrackBusActivity" android:exported="false" />
-
-        <!-- 🚀 Launcher -->
+            android:value="AIzaSyDjWXHa4cpYsQk01UBQUi6WtLtaZRRm1RI" /> <!-- 📱 Activities -->
+        <activity
+            android:name=".NotificationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SOSActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AttendanceActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TrackBus"
+            android:exported="false" />
+        <activity
+            android:name=".HomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".NextActivity"
+            android:exported="false" />
+        <activity
+            android:name=".TrackBusActivity"
+            android:exported="false" /> <!-- 🚀 Launcher -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Bustrackingapp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- 📡 Geofence Receiver -->
+        </activity> <!-- 📡 Geofence Receiver -->
         <receiver
             android:name=".GeofenceBroadcastReceiver"
             android:exported="true" />
