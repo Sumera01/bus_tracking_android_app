@@ -23,25 +23,39 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var busDetailsTextView: TextView
+    private lateinit var busInfoTextView: TextView
     private var busMarker: Marker? = null
     private var routeJob: Job? = null
 
     companion object {
         private const val LOCATION_PERMISSION_CODE = 100
         private const val GEOFENCE_RADIUS = 300f
-        private const val API_KEY = "AIzaSyDjWXHa4cpYsQk01UBQUi6WtLtaZRRm1RI" // 🔑 Insert your actual key here
+        private const val API_KEY = "AIzaSyDjWXHa4cpYsQk01UBQUi6WtLtaZRRm1RI"
     }
 
     private val zones = listOf(
-        LatLng(16.6784, 74.2434) to "SSC_Board",
-        LatLng(16.7288,74.2443) to "DYP_College"
+        LatLng(16.6999, 74.2323) to "Rajarampuri",
+        LatLng(16.7288, 74.2443) to "DY Patil College"
     )
+
+    private val busId = "bus_201"
+    private val busName = "rajarampuri nus"
+    private val driverName = "Ramesh Patil"
+    private val route = "Rajarampuri → DY Patil College"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_track_bus2)
 
         busDetailsTextView = findViewById(R.id.busDetailsTextView)
+        busInfoTextView = findViewById(R.id.busInfoTextView)
+
+        busInfoTextView.text = """
+             Bus ID: $busId
+             Name: $busName
+            ️ Driver: $driverName
+             Route: $route
+        """.trimIndent()
 
         findViewById<FloatingActionButton>(R.id.homeButton).setOnClickListener {
             startActivity(Intent(this, HomeActivity::class.java))
@@ -61,11 +75,7 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
 
         if (hasLocationPermission()) {
             lifecycleScope.launch {
-                drawRouteViaRoads(
-                    LatLng(16.6784, 74.2434),
-                    LatLng(16.7288,74.2443),
-                    "Route 1 (SSC_Board → DY Patil)"
-                )
+                drawRouteViaRoads(zones[0].first, zones[1].first, route)
             }
         } else {
             requestLocationPermission()
@@ -127,11 +137,7 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
         super.onRequestPermissionsResult(rq, perms, grants)
         if (rq == LOCATION_PERMISSION_CODE && hasLocationPermission()) {
             lifecycleScope.launch {
-                drawRouteViaRoads(
-                    LatLng(16.6784, 74.2434),
-                    LatLng(16.7288,74.2443),
-                    "Route 1"
-                )
+                drawRouteViaRoads(zones[0].first, zones[1].first, route)
             }
         }
     }
