@@ -18,6 +18,8 @@ import com.google.maps.android.PolyUtil
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import android.view.View
+import android.widget.LinearLayout
 
 class TrackBus : AppCompatActivity(), OnMapReadyCallback {
 
@@ -26,6 +28,8 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var busInfoTextView: TextView
     private var busMarker: Marker? = null
     private var routeJob: Job? = null
+    private lateinit var busDetailsExpanded: LinearLayout
+    private lateinit var busInfoSummary: LinearLayout
 
     companion object {
         private const val LOCATION_PERMISSION_CODE = 100
@@ -49,13 +53,20 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
 
         busDetailsTextView = findViewById(R.id.busDetailsTextView)
         busInfoTextView = findViewById(R.id.busInfoTextView)
+        busDetailsExpanded = findViewById(R.id.busDetailsExpanded)
+        busInfoSummary = findViewById(R.id.busInfoSummary)
 
-        busInfoTextView.text = """
-             Bus ID: $busId
-             Name: $busName
-            ️ Driver: $driverName
-             Route: $route
-        """.trimIndent()
+        // Set initial text for busInfoTextView
+        busInfoTextView.text = "Bus Details"
+
+        // Handle click to toggle expanded details
+        busInfoSummary.setOnClickListener {
+            if (busDetailsExpanded.visibility == View.VISIBLE) {
+                busDetailsExpanded.visibility = View.GONE
+            } else {
+                busDetailsExpanded.visibility = View.VISIBLE
+            }
+        }
 
         findViewById<FloatingActionButton>(R.id.homeButton).setOnClickListener {
             startActivity(Intent(this, HomeActivity::class.java))
@@ -154,7 +165,7 @@ class TrackBus : AppCompatActivity(), OnMapReadyCallback {
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE))
                 )
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(pos))
-                busDetailsTextView.text = "Bus at:\nLat: %.4f\nLng: %.4f".format(pos.latitude, pos.longitude)
+                busDetailsTextView.text = "Lat: %.4f\nLng: %.4f".format(pos.latitude, pos.longitude)
 
                 handleZoneTransitions(pos, zoneStates)
                 delay(2000L)
